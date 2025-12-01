@@ -5,6 +5,7 @@ import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from utils.contants import *
+import re
 
 class SentimentService:
     def __init__(self):
@@ -12,9 +13,13 @@ class SentimentService:
         self.tokenizer = AutoTokenizer.from_pretrained('5CD-AI/Vietnamese-Sentiment-visobert')
         self.device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
         self.model.to(self.device)
-
+    
+    def reprocessing_data(self,text:str):
+        text = re.sub(r'[\n\t\r]+', ' ',text)
+        return text
 
     def analysis(self,text: str):
+        text = self.reprocessing_data(text)
         input = self.tokenizer(text, padding = True,truncation = True,max_length = 128, return_tensors = "pt").to(self.device)
         output = self.model(**input)
         logits = output.logits
