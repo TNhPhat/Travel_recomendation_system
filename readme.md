@@ -258,13 +258,4 @@ http://localhost:8000/redoc
 
 ---
 
-# 🎯 DONE
 
-Bạn muốn mình viết thêm các phần:
-
-✅ ví dụ bằng Swift (iOS)
-✅ ví dụ bằng Flutter (Dart)
-✅ ví dụ bằng React Native
-✅ flow diagram API
-???
-Chỉ cần nói **"có"**!
