@@ -25,14 +25,7 @@ class EmbeddingService:
         if(vector1.size != vector2.size):
             print("Len Error (cosine)")
             return 
-        dot_product = 0
-        len_product1 = 0
-        len_product2= 0
-        for i in range(0,len(vector1)):
-            dot_product = dot_product +  vector1[i]*vector2[i]
-            len_product1 = len_product1 + vector1[i]**2
-            len_product2 = len_product2 + vector2[i]**2
-        return (dot_product/(sqrt(len_product1)*sqrt(len_product2)))
+        return (np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2)))
 
 embedding_service = EmbeddingService()
 

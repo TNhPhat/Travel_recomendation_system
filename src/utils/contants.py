@@ -48,6 +48,7 @@ LOCATION_TAG = {
         "giá hợp lý",
         "giá mắc",
         "luxury / sang trọng",
+        "luxury",
         "sang trọng"
     ]
 },
@@ -85,6 +86,7 @@ LOCATION_TAG = {
         "phù hợp trẻ em",
         "phù hợp người cao tuổi",
         "thân thiện người khuyết tật",
+        "phù hợp người khuyết tật",
         "gần trung tâm / dễ đi lại"
     ]
 },

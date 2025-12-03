@@ -10,10 +10,11 @@ class UserPreference(BaseModel):
 
 class GroupRequest(BaseModel):
     users: list[UserPreference]
+    number_of_places: int
 router = APIRouter()
 
 @router.post('/recomendation/')
 def get_group_recommendations(request: GroupRequest):
     data_src = [[user.prompt, user.chosen_tags] for user in request.users]
-    recoment_location_id = recomendation_service.get_location_recomendation(data_src)
+    recoment_location_id,location_name = recomendation_service.get_location_recomendation(data_src,request.number_of_places)
     return {"recommendations": recoment_location_id}

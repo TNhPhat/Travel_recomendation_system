@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import ast
+import math
 from math import *
 import torch.nn.functional as F
 import numpy as np
@@ -21,7 +22,7 @@ class RecomendationService:
             self.dataset.at[index, 'feature'] = embedding_service.embedding(ast.literal_eval(row['label']))
         self.dataset.drop(['label','col11'],axis=1,inplace = True)
         self.dataset['sentiment_score'] = [0.0 for _ in range(len(self.dataset))]
-        self.dataset['sentiment_score'] = np.random.uniform(-1, 1, size=len(self.dataset))
+        # self.dataset['sentiment_score'] = np.random.uniform(-1, 1, size=len(self.dataset))
 
     def calc_cosine(self,favourite_embedded):
         self.dataset['cosine'] = np.nan
@@ -36,10 +37,14 @@ class RecomendationService:
         prompt_tag_dict = {}
         if(len(prompt) > 0):
             prompt_tag_dict = json.loads(geminiAPI_service.get_tag_from_prompt(prompt,get_tags_list()))
+            print(prompt_tag_dict)
         chosen_tag_dict = {tag:0.6 for tag in list_tags}
         prompt_tag_embedded = embedding_service.embedding(prompt_tag_dict)
         chosen_tag_embedded = embedding_service.embedding(chosen_tag_dict)
         rms_weights = np.sqrt((chosen_tag_embedded**2 + prompt_tag_embedded**2) / 2)
+        for i in range(len(chosen_tag_dict)):
+            if chosen_tag_dict[i] == 0.0:
+                rms_weights[i] = prompt_tag_dict[i]
         return rms_weights
     
     #data src [[prompt,[list_chosen_tag]]]
@@ -51,11 +56,18 @@ class RecomendationService:
             group_favourite_embedded.append(self.get_person_favourite_embedded(user_prompt,user_chosen_tag))
         return embedding_service.combine_embedding_vector(group_favourite_embedded)
     
-    def mmr_select(self, top_k=20, lambda_param=0.7):
+    def auto_lambda(self,top_k, max_k=50):
+        return round(1 - (math.log(top_k + 1) / math.log(max_k + 1)), 2)
+
+    def mmr_select(self, top_k=10,lambda_param = 0.5):
+        # lambda_param = self.auto_lambda(top_k)
+        # print(lambda_param)
         if 'recomendation_score' not in self.dataset.columns:
             raise ValueError("Bạn cần chạy calc_recomnentation_score(favourite_embedded) trước")
-        selected_idxs = []
+        most_recomendation_score = np.argmax(self.dataset['recomendation_score'])
+        selected_idxs = [most_recomendation_score]
         candidate_idxs = list(range(len(self.dataset)))
+        candidate_idxs.remove(most_recomendation_score)
         embeddings = np.stack(self.dataset['feature'].values)
         scores = self.dataset['recomendation_score'].values
 
@@ -79,12 +91,13 @@ class RecomendationService:
         
         return self.dataset.iloc[selected_idxs].reset_index(drop=True)
     
-    def get_location_recomendation(self,data_src):
+    def get_location_recomendation(self,data_src,number_of_location):
         favourite_embedded = self.get_group_favourite_embedded(data_src)
         self.calc_recomnentation_score(favourite_embedded)
-        location = self.mmr_select()
+        print(self.dataset.sort_values(by ='recomendation_score',ascending=False).head())
+        location = self.mmr_select(number_of_location)
         location_id = location['id'].tolist()
-        return location_id
+        return location_id,location['name'].tolist()
 
 recomendation_service = RecomendationService()
 
