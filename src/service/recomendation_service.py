@@ -114,20 +114,25 @@ class RecomendationService:
         self.calc_cosine(favourite_embedded)
         self.dataset['recomendation_score'] = 0.7*self.dataset['cosine'] + 0.3*self.dataset['sentiment_score']
 
-    def get_person_favourite_embedded(self,prompt,list_tags):
+    def get_person_favourite_embedded(self, prompt, list_tags):
         prompt_tag_dict = {}
-        if(len(prompt) > 0):
-            prompt_tag_dict = json.loads(geminiAPI_service.get_tag_from_prompt(prompt,get_tags_list()))
-            print(prompt_tag_dict)
-        chosen_tag_dict = {tag:0.6 for tag in list_tags}
+        if len(prompt) > 0:
+            prompt_tag_dict = json.loads(
+                geminiAPI_service.get_tag_from_prompt(prompt, get_tags_list())
+            )
+        chosen_tag_dict = {tag: 1.0 for tag in list_tags}
         prompt_tag_embedded = embedding_service.embedding(prompt_tag_dict)
         chosen_tag_embedded = embedding_service.embedding(chosen_tag_dict)
-        print(chosen_tag_embedded)
+
         rms_weights = np.sqrt((chosen_tag_embedded**2 + prompt_tag_embedded**2) / 2)
-        for i in range(len(chosen_tag_embedded)):
-            if chosen_tag_embedded[i] == 0.0:
-                rms_weights[i] = prompt_tag_embedded[i]
+        rms_weights = np.where(chosen_tag_embedded == 0, 
+                            prompt_tag_embedded, 
+                            rms_weights)
+        rms_weights = np.where(prompt_tag_embedded == 0, 
+                            chosen_tag_embedded, 
+                            rms_weights)
         return rms_weights
+
     
     #data src [[prompt,[list_chosen_tag]]]
     def get_group_favourite_embedded(self,data_src):
@@ -146,12 +151,26 @@ class RecomendationService:
         return embedding_service.combine_embedding_vector(group_favourite_embedded)
     
     
-    def auto_lambda(self,top_k, max_k=50):
-        return round(1 - (math.log(top_k + 1) / math.log(max_k + 1)), 2)
+    def tag_probabilities(self,tag_vector):
+        v = np.array(tag_vector, dtype=float)
+        v = np.maximum(v, 0)
+        s = np.sum(v)
+        return v / s if s > 0 else np.zeros_like(v)
+    
+    def tag_entropy(self,tag_probs):
+        eps = 1e-12
+        return -np.sum(tag_probs * np.log(tag_probs + eps))
+    
+    def lambda_from_entropy(self,entropy, n_tag, min_lambda=0.5, max_lambda=1):
+        # normalize 0 → 1
+        norm = entropy / np.log(n_tag)
+        # entropy thấp => λ cao ; entropy cao => λ thấp
+        return max_lambda - norm * (max_lambda - min_lambda)
 
     def mmr_select(self, top_k=10,lambda_param = 0.9):
         # lambda_param = self.auto_lambda(top_k)
         # print(lambda_param)
+        print(lambda_param)
         if 'recomendation_score' not in self.dataset.columns:
             raise ValueError("Bạn cần chạy calc_recomnentation_score(favourite_embedded) trước")
         most_recomendation_score = np.argmax(self.dataset['recomendation_score'])
@@ -185,7 +204,7 @@ class RecomendationService:
     def get_location_recomendation(self,favourite_vector,number_of_location):
         favourite_embedded = embedding_service.embedding(favourite_vector)
         self.calc_recomnentation_score(favourite_embedded)
-        location = self.mmr_select(number_of_location)
+        location = self.mmr_select(number_of_location,lambda_param=self.lambda_from_entropy(self.tag_entropy(self.tag_probabilities(favourite_embedded)), len(favourite_embedded)))
         location_id = location['id'].tolist()
         return location_id,location['name'].tolist(),location['cosine'].tolist()
 
@@ -194,8 +213,9 @@ class RecomendationService:
             favourite_embedded = self.get_group_favourite_embedded(data_src)
         else:
             favourite_embedded = self.get_group_favourite_embedded2(data_src)
+        
         self.calc_recomnentation_score(favourite_embedded)
-        location = self.mmr_select(number_of_location)
+        location = self.mmr_select(number_of_location,lambda_param=self.lambda_from_entropy(self.tag_entropy(self.tag_probabilities(favourite_embedded)), len(favourite_embedded)))
         location_id = location['id'].tolist()
         return location_id,location['name'].tolist()
 
