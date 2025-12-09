@@ -38,16 +38,12 @@ Folder `model/` chứa các file cần thiết:
 
 **Download link Google Drive:**
 ```
-[Thay thế URL này bằng link Google Drive của bạn]
-https://drive.google.com/drive/folders/FOLDER_ID
+https://drive.google.com/drive/folders/1lPENYX3rcT5eNceKz_GBoWGT66LrzLlP?usp=sharing
 ```
 
-### Cách tải xuống:
-1. Truy cập link Google Drive ở trên
-2. Click phải vào folder `model` → chọn "Download" (hoặc Ctrl + Shift + D)
-3. Chờ file tải xuống (thường là file .zip)
-4. Giải nén file vào thư mục root của project
-5. Kiểm tra cấu trúc folder:
+### Cách sử dụng:
+1. Giải nén folder model vào thư mục root của project
+2. Kiểm tra cấu trúc folder:
 ```
 Travel_recomendation_system/
 ├── model/
