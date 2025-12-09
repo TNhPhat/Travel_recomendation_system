@@ -154,3 +154,6 @@ def get_tags_list():
         else:
             tags.extend(sub)
     return tags
+
+tags_list = get_tags_list()
+# print(','.join([f"\"{tag}\"" for tag in tags_list]))

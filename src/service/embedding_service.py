@@ -21,6 +21,13 @@ class EmbeddingService:
     def combine_embedding_vector(self,numpy_list):
         return np.mean(numpy_list,axis = 0)
     
+    def convert_embedded_to_dict(self,embedded_array):
+        tag_dict = {}
+        for index,num in enumerate(embedded_array):
+            if(num > 0):
+                tag_dict.update({tags_list[index]:num})
+        return tag_dict
+
     def calc_cosine(self,vector1,vector2):
         if(vector1.size != vector2.size):
             print("Len Error (cosine)")

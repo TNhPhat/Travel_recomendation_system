@@ -10,33 +10,123 @@ API cung cấp gợi ý địa điểm dựa trên:
 
 ---
 
-# 🚀 1. Cách chạy FastAPI
+# 🚀 1. Chuẩn bị môi trường
 
 ## **Yêu cầu**
-requirements.txt
+- Python 3.8+
+- pip hoặc conda
+- File `requirements.txt`
+- Folder `model/` có chứa các file model
+- API key từ Google Gemini
 
-## **Cài đặt**
+## **Bước 1: Cài đặt dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## **Chạy server**
+## **Bước 2: Tải folder model từ Google Drive**
+
+Folder `model/` chứa các file cần thiết:
+- `model.safetensors` - Model neural network
+- `config.json` - Cấu hình model
+- `scaler.pt` - Feature scaler
+- `optimizer.pt` - Optimizer state
+- `scheduler.pt` - Learning rate scheduler
+- `trainer_state.json` - Trạng thái huấn luyện
+- `rng_state.pth` - Random state
+
+**Download link Google Drive:**
+```
+[Thay thế URL này bằng link Google Drive của bạn]
+https://drive.google.com/drive/folders/FOLDER_ID
+```
+
+### Cách tải xuống:
+1. Truy cập link Google Drive ở trên
+2. Click phải vào folder `model` → chọn "Download" (hoặc Ctrl + Shift + D)
+3. Chờ file tải xuống (thường là file .zip)
+4. Giải nén file vào thư mục root của project
+5. Kiểm tra cấu trúc folder:
+```
+Travel_recomendation_system/
+├── model/
+│   ├── model.safetensors
+│   ├── config.json
+│   ├── scaler.pt
+│   ├── optimizer.pt
+│   ├── scheduler.pt
+│   ├── trainer_state.json
+│   └── rng_state.pth
+├── src/
+├── data/
+├── requirements.txt
+└── readme.md
+```
+
+## **Bước 3: Cấu hình API Key**
+
+Tạo file `.env` trong thư mục root project:
+
+```env
+GEMINI_API_KEY=your_api_key_here
+```
+
+Lấy API key từ [Google AI Studio](https://aistudio.google.com/apikey)
+
+## **Bước 4: Chạy server FastAPI**
+
+### **Tùy chọn A: Chạy với HTTP (phát triển)**
+
+```bash
+fastapi dev src/main.py
+```
+
+hoặc
 
 ```bash
 uvicorn src.main:app --reload
 ```
 
-### Mặc định server sẽ chạy tại:
+Server sẽ chạy tại: `http://localhost:8000`
 
-```
-http://localhost:8000
-```
-## **API_KEY**
-Thêm file .env vào folder root sau đó thêm gemini_api_key để sử dụng:
+### **Tùy chọn B: Chạy với HTTPS (production)**
+
+#### **Bước 4.1: Tự generate SSL Certificate**
+
+Chạy lệnh sau để tạo certificate và key file:
+
 ```bash
-GEMINI_API_KEY=xxxxxxx
+# Tạo thư mục certs nếu chưa có
+mkdir certs
+
+# Generate private key
+openssl genrsa -out certs/key.pem 2048
+
+# Generate self-signed certificate (hiệu lực 365 ngày)
+openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -days 365 -subj "/C=VN/ST=HCM/L=HCM/O=Travel/CN=localhost"
 ```
+
+**Kết quả sẽ có 2 file:**
+- `certs/key.pem` - Private key
+- `certs/cert.pem` - SSL Certificate
+
+#### **Bước 4.2: Chạy server với HTTPS**
+
+```bash
+uvicorn src.main:app --reload --ssl-keyfile=certs/key.pem --ssl-certfile=certs/cert.pem --host 0.0.0.0 --port 8443
+```
+
+Server sẽ chạy tại: `https://localhost:8443`
+
+### **Truy cập dokumentasi API:**
+
+- **Swagger UI (HTTP)**: http://localhost:8000/docs
+- **ReDoc (HTTP)**: http://localhost:8000/redoc
+- **Swagger UI (HTTPS)**: https://localhost:8443/docs
+- **ReDoc (HTTPS)**: https://localhost:8443/redoc
+
+> **Lưu ý:** Nếu dùng certificate self-signed, trình duyệt sẽ cảnh báo. Chọn "Tiếp tục truy cập" để tiếp tục.
 ---
 
 # 📌 2. Gọi API
@@ -60,7 +150,8 @@ POST /location_recomendation/recomendation/
       "prompt": "thích chụp ảnh",
       "chosen_tags": ["view", "nature"]
     }
-  ]
+  ],
+  "number_of_places": 10
 }
 ```
 

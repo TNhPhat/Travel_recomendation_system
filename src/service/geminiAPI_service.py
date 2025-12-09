@@ -14,8 +14,9 @@ class GeminiAPI_service():
         self.model = genai.GenerativeModel("gemini-2.5-flash") 
 
     def sleep(self):
-        print("sleep for 5 seconds")
-        time.sleep(5)
+        # print("sleep for 5 seconds")
+        # time.sleep(5)
+        return
 
     def get_tag_from_prompt(self,user_prompt,tag_list):
         prompt = f"""
