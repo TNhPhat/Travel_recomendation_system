@@ -41,8 +41,8 @@ def get_group_recommendations_by_tag_dict(request: DictList):
 
 @router.post('/personal_recomendation_by_tag_dict')
 def get_personal_recommendations(request: Request3):
-    recoment_location_id,location_name = recomendation_service.get_location_recomendation(request.tag_dict,request.number_of_places)
-    return {"recommendations": recoment_location_id}
+    recoment_location_id,location_name,location_cosine = recomendation_service.get_location_recomendation(request.tag_dict,request.number_of_places)
+    return {"recommendations": recoment_location_id,"match_score": location_cosine}
 
 @router.post('/get_schedule')
 def get_schedule(request: schedule_request):

@@ -149,7 +149,7 @@ class RecomendationService:
     def auto_lambda(self,top_k, max_k=50):
         return round(1 - (math.log(top_k + 1) / math.log(max_k + 1)), 2)
 
-    def mmr_select(self, top_k=10,lambda_param = 0.5):
+    def mmr_select(self, top_k=10,lambda_param = 0.9):
         # lambda_param = self.auto_lambda(top_k)
         # print(lambda_param)
         if 'recomendation_score' not in self.dataset.columns:
@@ -187,7 +187,7 @@ class RecomendationService:
         self.calc_recomnentation_score(favourite_embedded)
         location = self.mmr_select(number_of_location)
         location_id = location['id'].tolist()
-        return location_id,location['name'].tolist()
+        return location_id,location['name'].tolist(),location['cosine'].tolist()
 
     def get_group_location_recomendation(self,data_src,number_of_location,tag_dict = False):
         if not tag_dict:
