@@ -102,9 +102,6 @@ class RecomendationService:
         print(json.loads(clean_text))
         return json.loads(clean_text)
 
-
-
-
     def calc_cosine(self,favourite_embedded):
         self.dataset['cosine'] = np.nan
         for index,row in self.dataset.iterrows():
@@ -123,7 +120,6 @@ class RecomendationService:
         chosen_tag_dict = {tag: 1.0 for tag in list_tags}
         prompt_tag_embedded = embedding_service.embedding(prompt_tag_dict)
         chosen_tag_embedded = embedding_service.embedding(chosen_tag_dict)
-
         rms_weights = np.sqrt((chosen_tag_embedded**2 + prompt_tag_embedded**2) / 2)
         rms_weights = np.where(chosen_tag_embedded == 0, 
                             prompt_tag_embedded, 
@@ -162,9 +158,7 @@ class RecomendationService:
         return -np.sum(tag_probs * np.log(tag_probs + eps))
     
     def lambda_from_entropy(self,entropy, n_tag, min_lambda=0.5, max_lambda=1):
-        # normalize 0 → 1
         norm = entropy / np.log(n_tag)
-        # entropy thấp => λ cao ; entropy cao => λ thấp
         return max_lambda - norm * (max_lambda - min_lambda)
 
     def mmr_select(self, top_k=10,lambda_param = 0.9):

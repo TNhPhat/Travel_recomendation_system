@@ -28,11 +28,15 @@ class EmbeddingService:
                 tag_dict.update({tags_list[index]:num})
         return tag_dict
 
-    def calc_cosine(self,vector1,vector2):
-        if(vector1.size != vector2.size):
+    def calc_cosine(self, vector1, vector2):
+        if vector1.size != vector2.size:
             print("Len Error (cosine)")
-            return 
-        return (np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2)))
+            return 0.0 
+        norm1 = np.linalg.norm(vector1)
+        norm2 = np.linalg.norm(vector2)
+        if norm1 == 0 or norm2 == 0:
+            return 0.0
+        return np.dot(vector1, vector2) / (norm1 * norm2)
 
 embedding_service = EmbeddingService()
 
