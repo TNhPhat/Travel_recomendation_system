@@ -10,18 +10,20 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.contants import *
 from service.embedding_service import embedding_service
 from service.geminiAPI_service import geminiAPI_service
+from service.firestore_service import firestore_service
 import re
 
 class RecomendationService:
     def __init__(self):
-        column_names = ['id', 'address', 'category', 'description','coordinates','name','city','opening_hour','provine','label','col11']
-        self.dataset = pd.read_csv('data\\database.csv',header = None,names=column_names)
-        self.dataset['feature'] = [np.array([]) for _ in range(len(self.dataset))]
-        self.dataset['max_cosine'] = [0.0 for _ in range(len(self.dataset))]
-        for index,row in self.dataset.iterrows():
-            self.dataset.at[index, 'feature'] = embedding_service.embedding(ast.literal_eval(row['label']))
-        self.dataset.drop(['label','col11'],axis=1,inplace = True)
-        self.dataset['sentiment_score'] = [0.0 for _ in range(len(self.dataset))]
+        # column_names = ['id', 'address', 'category', 'description','coordinates','name','city','opening_hour','provine','label','col11']
+        # self.dataset = pd.read_csv('data\\database.csv',header = None,names=column_names)
+        self.dataset = firestore_service.get_locations_dataframe()
+        self.dataset['feature'] = self.dataset['label'].apply(
+            lambda x: embedding_service.embedding(ast.literal_eval(x))
+        )
+        # self.dataset.drop(['label','col11'],axis=1,inplace = True)
+        self.dataset.drop(['label'],axis=1,inplace = True)
+        self.start_review_listener()
         # self.dataset['sentiment_score'] = np.random.uniform(-1, 1, size=len(self.dataset))
 
     #dict_locaitonId_voteNum {string:int}
@@ -38,6 +40,19 @@ class RecomendationService:
             info.update({"Votes": voteNum})
             data.append(info)
         return data
+
+    def start_review_listener(self):
+        def handler(location_id, sentiment_sum, count):
+            idx = self.dataset.index[self.dataset["id"] == location_id]
+            if len(idx) == 0:
+                return
+            i = idx[0]
+            self.dataset.at[i, "sentiment_sum"] = sentiment_sum
+            self.dataset.at[i, "num_reviews"] = count
+            score = sentiment_sum / count if count > 0 else 0.0
+            self.dataset.at[i, "sentiment_score"] = score
+            print(f"[UPDATE] {self.dataset[self.dataset['id'] == location_id]['name']} | sum={sentiment_sum}, count={count}, score={score}")
+        firestore_service.listen_reviews_realtime(handler)
     
     def get_schedule(self,dict_locaitonId_VoteNum,time_start,time_end):
         location_data = self.get_shedule_input_data(dict_locaitonId_VoteNum)
@@ -102,10 +117,15 @@ class RecomendationService:
         print(json.loads(clean_text))
         return json.loads(clean_text)
 
-    def calc_cosine(self,favourite_embedded):
-        self.dataset['cosine'] = np.nan
-        for index,row in self.dataset.iterrows():
-            self.dataset.at[index,'cosine'] = embedding_service.calc_cosine(row['feature'],favourite_embedded)
+    def calc_cosine(self, favourite_embedded):
+        self.dataset['cosine'] = self.dataset['feature'].apply(
+            lambda feature: embedding_service.calc_cosine(feature, favourite_embedded)
+        )
+        self.dataset['sentiment_score'] = np.where(
+            self.dataset['num_reviews'] == 0,
+            0,
+            self.dataset['sentiment_sum'] / self.dataset['num_reviews']
+        )
 
     def calc_recomnentation_score(self,favourite_embedded):
         self.calc_cosine(favourite_embedded)
@@ -193,7 +213,7 @@ class RecomendationService:
             candidate_idxs.remove(idx_max)
         
         return self.dataset.iloc[selected_idxs].reset_index(drop=True)
-    
+
 
     def get_location_recomendation(self,favourite_vector,number_of_location):
         favourite_embedded = embedding_service.embedding(favourite_vector)
