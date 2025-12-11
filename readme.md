@@ -44,6 +44,7 @@ https://drive.google.com/drive/folders/1lPENYX3rcT5eNceKz_GBoWGT66LrzLlP?usp=sha
 ### Cách sử dụng:
 1. Giải nén folder model vào thư mục root của project
 2. Kiểm tra cấu trúc folder:
+3. Lấy googleService.json bỏ vào root folder
 ```
 Travel_recomendation_system/
 ├── model/
@@ -57,6 +58,7 @@ Travel_recomendation_system/
 ├── src/
 ├── data/
 ├── requirements.txt
+├── googleService.json
 └── readme.md
 ```
 
