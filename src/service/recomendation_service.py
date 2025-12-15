@@ -215,11 +215,14 @@ class RecomendationService:
         return self.dataset.iloc[selected_idxs].reset_index(drop=True)
 
 
-    def get_location_recomendation(self,favourite_vector,number_of_location):
+    def get_location_recomendation(self,favourite_vector,number_of_location,destination):
+        tmp_dataset  = self.dataset.copy()
+        self.dataset = self.dataset[self.dataset['city'].str.lower() == destination.lower()].reset_index(drop=True)
         favourite_embedded = embedding_service.embedding(favourite_vector)
         self.calc_recomnentation_score(favourite_embedded)
         location = self.mmr_select(number_of_location,lambda_param=self.lambda_from_entropy(self.tag_entropy(self.tag_probabilities(favourite_embedded)), len(favourite_embedded)))
         location_id = location['id'].tolist()
+        self.dataset = tmp_dataset
         return location_id,location['name'].tolist(),location['cosine'].tolist()
 
     def get_group_location_recomendation(self,data_src,number_of_location,tag_dict = False):
