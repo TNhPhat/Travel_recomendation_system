@@ -114,7 +114,13 @@ openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -days 365 -subj "/
 ```bash
 uvicorn src.main:app --reload --ssl-keyfile=certs/key.pem --ssl-certfile=certs/cert.pem --host 0.0.0.0 --port 8000
 ```
-
+#### **Bước 4.3: deploy server với ngrok*
+- cài ngrok trên microsoft store.
+- Tạo tài khoản ngrok trên wed và paste token vào authtoken.
+- vào powershell chạy
+```bash
+ngrok http https://localhost:8000 --authtoken=
+```
 Server sẽ chạy tại: `https://localhost:8000`
 
 ### **Truy cập dokumentasi API:**
