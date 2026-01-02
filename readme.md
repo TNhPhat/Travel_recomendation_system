@@ -176,7 +176,7 @@ To obtain a Gemini API key:
 3. Create a new API key
 4. Copy the key to your `.env` file
 
-### Step 5: Setup Firebase Credentials
+### Step 5: Setup Firebase Credentials(provided in the submission files)
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Select your project
@@ -551,7 +551,3 @@ This project is licensed under the terms specified in the [LICENSE](LICENSE) fil
 For questions, issues, or feature requests:
 - Open an issue on GitHub
 - Contact the development team
-
----
-
-**Note**: This is an academic/research project. Ensure compliance with all relevant data protection regulations (GDPR, CCPA, etc.) and obtain proper licenses before deploying to production with real user data.
