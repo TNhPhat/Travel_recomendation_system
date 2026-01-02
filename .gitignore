@@ -209,3 +209,7 @@ model/
 .env
 src/core/
 
+uv.lock
+serviceAccountKey.json
+server.crt
+server.key
