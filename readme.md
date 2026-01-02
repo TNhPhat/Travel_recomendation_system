@@ -2,6 +2,26 @@
 
 A production-ready intelligent travel recommendation system powered by machine learning, natural language processing, and real-time sentiment analysis. This API serves personalized location recommendations to an Android mobile application through secure RESTful endpoints.
 
+
+## Table of Contents
+
+- [Architecture](#architecture)
+- [Features](#features)
+- [Installation](#installation)
+- [Running the API](#running-the-api)
+- [API Endpoints](#api-endpoints)
+- [Algorithm Details](#algorithm-details)
+- [Project Structure](#project-structure)
+- [Database Schema](#database-schema)
+- [Tag System](#tag-system)
+- [Performance Considerations](#performance-considerations)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Contact & Support](#contact--support)
+
+
 ## Overview
 
 This system combines advanced ML techniques to deliver contextual travel recommendations:
@@ -176,7 +196,12 @@ To obtain a Gemini API key:
 3. Create a new API key
 4. Copy the key to your `.env` file
 
-### Step 5: Setup Firebase Credentials(provided in the submission files)
+### Step 5: Setup Firebase Credentials
+
+**Note**: Both `serviceAccountKey.json` and `.env` files are already provided in the submission folder. Simply ensure they are placed in the project root directory.
+
+<details>
+<summary>If you need to generate your own credentials (click to expand)</summary>
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Select your project
@@ -185,6 +210,8 @@ To obtain a Gemini API key:
 5. Download the JSON file
 6. Rename it to `serviceAccountKey.json`
 7. Place it in the project root directory
+
+</details>
 
 ## Running the API
 
