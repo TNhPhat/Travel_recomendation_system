@@ -197,8 +197,8 @@ To obtain a Gemini API key:
 4. Copy the key to your `.env` file
 
 ### Step 5: Setup Firebase Credentials
-
-**Note**: Both `serviceAccountKey.json` and `.env` files are already provided in the submission folder. Simply ensure they are placed in the project root directory.
+1. If you don't have file `serviceAccountKey.json` download it at our google drive link for project's needed file
+2. Simply ensure it is placed in the project root directory.
 
 <details>
 <summary>If you need to generate your own credentials (click to expand)</summary>
