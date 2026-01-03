@@ -245,6 +245,51 @@ Access the API:
 - Windows: `ipconfig` (look for IPv4 Address)
 - Linux/macOS: `ifconfig` or `ip addr`
 
+### Public Access (Using ngrok)
+
+For exposing your API to the public internet (testing with remote devices or demo purposes), use ngrok:
+
+**Step 1: Install ngrok**
+
+Download and install ngrok from [https://ngrok.com/download](https://ngrok.com/download)
+
+**Step 2: Sign up and get Auth Token**
+
+1. Create a free account at [https://dashboard.ngrok.com/signup](https://dashboard.ngrok.com/signup)
+2. Get your auth token from [https://dashboard.ngrok.com/get-started/your-authtoken](https://dashboard.ngrok.com/get-started/your-authtoken)
+3. Configure ngrok with your token:
+   ```bash
+   ngrok config add-authtoken YOUR_AUTH_TOKEN
+   ```
+
+**Step 3: Start your API**
+
+In one terminal, run your FastAPI server:
+```bash
+uvicorn src.main:app --host 127.0.0.1 --port 8000
+```
+
+**Step 4: Start ngrok tunnel**
+
+In another terminal, create a public HTTPS tunnel:
+```bash
+ngrok http 8000
+```
+
+**Step 5: Use the public URL**
+
+ngrok will display a public HTTPS URL (e.g., `https://abc123.ngrok-free.app`). Use this URL to access your API from anywhere:
+- Swagger UI: `https://abc123.ngrok-free.app/docs`
+- Android app: Use the ngrok URL as your base endpoint
+
+**Notes**:
+- Free ngrok URLs change each time you restart ngrok
+- Paid plans offer reserved domains and custom URLs
+- ngrok provides built-in HTTPS/SSL encryption
+- Monitor requests in the ngrok web interface at `http://127.0.0.1:4040`
+
+**⚠️ Security Warning**: Only expose your API publicly when needed for testing. Never expose APIs with sensitive data or without proper authentication in production.
+
 ## API Endpoints
 
 ### Sentiment Analysis
